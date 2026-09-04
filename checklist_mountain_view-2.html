@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Inspección — Mountain View</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pine:#1F3B32;
+    --pine-light:#33564A;
+    --cream:#F6F1E6;
+    --paper:#FFFDF8;
+    --wood:#A9714A;
+    --wood-dark:#7C4E2E;
+    --ink:#241F1A;
+    --ink-soft:#6B6459;
+    --ok:#3E7A4C;
+    --ok-bg:#E4F0E2;
+    --issue:#B84332;
+    --issue-bg:#F8E4DF;
+    --line:#E4DCC9;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    padding-bottom:92px;
+  }
+  header{
+    background:var(--pine);
+    color:var(--paper);
+    padding:20px 18px 22px;
+    border-radius:0 0 22px 22px;
+    position:relative;
+    overflow:hidden;
+  }
+  header::after{
+    content:"";
+    position:absolute;
+    right:-30px; top:-30px;
+    width:140px; height:140px;
+    background:var(--pine-light);
+    border-radius:50%;
+    opacity:.55;
+  }
+  header .eyebrow{
+    font-size:12.5px;
+    color:#C9D9CE;
+    letter-spacing:.02em;
+    position:relative;
+  }
+  header h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:26px;
+    margin:4px 0 16px;
+    position:relative;
+    line-height:1.15;
+  }
+  .field-row{
+    display:flex;
+    gap:10px;
+    position:relative;
+  }
+  .field{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .field label{
+    font-size:11.5px;
+    color:#BFD1C4;
+  }
+  .field input{
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.3);
+    border-radius:10px;
+    padding:9px 11px;
+    color:#fff;
+    font-size:15px;
+    font-family:inherit;
+  }
+  .field input::placeholder{color:#9FB6A7;}
+  .field input:focus, .field select:focus{outline:2px solid #E8B36B; outline-offset:1px;}
+  .field select{
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.3);
+    border-radius:10px;
+    padding:9px 11px;
+    color:#fff;
+    font-size:15px;
+    font-family:inherit;
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  .field select option{color:#111;}
+  .priority-tag{
+    margin-top:10px;
+    display:inline-flex;
+    font-size:12px;
+    background:rgba(255,255,255,.14);
+    color:#EADFC6;
+    padding:4px 10px;
+    border-radius:20px;
+    position:relative;
+  }
+
+  .progress-wrap{
+    margin:16px 18px 4px;
+  }
+  .progress-top{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:6px;
+  }
+  .progress-top .pct{
+    font-family:'Fraunces',serif;
+    font-size:22px;
+    font-weight:600;
+    color:var(--pine);
+  }
+  .progress-top .label{
+    font-size:12.5px; color:var(--ink-soft);
+  }
+  .progress-track{
+    height:8px;
+    background:var(--line);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--wood),var(--ok));
+    border-radius:6px;
+    transition:width .3s ease;
+    width:0%;
+  }
+  .summary-chips{
+    display:flex; gap:8px; margin-top:10px; font-size:12px;
+  }
+  .chip{
+    padding:4px 9px; border-radius:20px; font-weight:600;
+  }
+  .chip.ok-chip{background:var(--ok-bg); color:var(--ok);}
+  .chip.issue-chip{background:var(--issue-bg); color:var(--issue);}
+
+  main{padding:14px 18px 0;}
+
+  details.section{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    margin-bottom:12px;
+    overflow:hidden;
+  }
+  details.section[open]{
+    box-shadow:0 2px 10px rgba(31,59,50,.06);
+  }
+  summary{
+    list-style:none;
+    padding:14px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    cursor:pointer;
+    font-weight:600;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary .sec-title{
+    display:flex; align-items:center; gap:10px;
+    font-size:15px;
+    color:var(--pine);
+  }
+  summary .sec-title .icon{font-size:17px;}
+  summary .sec-status{
+    font-size:12px;
+    color:var(--ink-soft);
+    display:flex; align-items:center; gap:6px;
+  }
+  summary .caret{
+    transition:transform .2s ease;
+    color:var(--ink-soft);
+    font-size:13px;
+  }
+  details[open] summary .caret{transform:rotate(90deg);}
+
+  .item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:11px 14px;
+    border-top:1px solid var(--line);
+  }
+  .item .item-text{
+    flex:1;
+    font-size:14.5px;
+    line-height:1.35;
+  }
+  .item .btns{display:flex; gap:6px;}
+  .btn-toggle{
+    width:36px; height:36px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    font-size:16px;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft);
+  }
+  .btn-toggle{
+    width:34px; font-size:13px;
+  }
+  .btn-toggle.active-ok{
+    background:var(--ok-bg); border-color:var(--ok); color:var(--ok);
+  }
+  .btn-toggle.active-obs{
+    background:var(--issue-bg); border-color:var(--issue); color:var(--issue);
+  }
+  .btn-toggle.active-na{
+    background:#EDE9E1; border-color:var(--ink-soft); color:var(--ink-soft);
+  }
+  .note-input{
+    grid-column:1 / -1;
+    width:100%;
+    margin-top:8px;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid var(--issue);
+    background:#fff;
+    font-size:13.5px;
+    font-family:inherit;
+  }
+  .item.has-note{flex-wrap:wrap;}
+  .obs-extra{
+    width:100%;
+  }
+  .photo-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:8px;
+  }
+  .photo-btn{
+    width:38px; height:38px;
+    border-radius:9px;
+    border:1.5px dashed var(--issue);
+    background:#fff;
+    color:var(--issue);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+    flex-shrink:0;
+    cursor:pointer;
+  }
+  .photo-thumb-wrap{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .photo-thumb{
+    position:relative;
+    width:44px; height:44px;
+    border-radius:9px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .photo-thumb img{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .photo-thumb .rm{
+    position:absolute; top:-4px; right:-4px;
+    width:17px; height:17px;
+    background:var(--issue);
+    color:#fff;
+    border-radius:50%;
+    font-size:11px;
+    display:flex; align-items:center; justify-content:center;
+    line-height:1;
+    border:none;
+  }
+  .photo-note{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:6px;
+  }
+
+  .obs-block{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px;
+    margin-bottom:16px;
+  }
+  .obs-block label{
+    font-size:13px; font-weight:600; color:var(--pine);
+    display:block; margin-bottom:8px;
+  }
+  .obs-block textarea{
+    width:100%;
+    min-height:70px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px;
+    font-family:inherit;
+    font-size:14px;
+    resize:vertical;
+    color:var(--ink);
+  }
+
+  .status-block{
+    background:var(--paper);
+    border:2px solid var(--pine);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:16px;
+  }
+  .status-block > label{
+    font-size:14px; font-weight:700; color:var(--pine);
+    display:block; margin-bottom:12px;
+  }
+  .status-options{
+    display:flex;
+    gap:8px;
+  }
+  .status-btn{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    padding:12px 6px;
+    border-radius:12px;
+    border:2px solid var(--line);
+    background:var(--cream);
+    font-family:inherit;
+    font-weight:600;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .status-btn .dot{
+    width:20px; height:20px;
+    border-radius:50%;
+    border:2px solid currentColor;
+  }
+  .status-btn[data-status="verde"] .dot{background:#3E7A4C; border-color:#3E7A4C;}
+  .status-btn[data-status="amarillo"] .dot{background:#D9A62E; border-color:#D9A62E;}
+  .status-btn[data-status="rojo"] .dot{background:#B84332; border-color:#B84332;}
+  .status-btn.active[data-status="verde"]{
+    background:#E4F0E2; border-color:#3E7A4C; color:#2C5A38;
+  }
+  .status-btn.active[data-status="amarillo"]{
+    background:#FBF0D9; border-color:#D9A62E; color:#8A6A1D;
+  }
+  .status-btn.active[data-status="rojo"]{
+    background:#F8E4DF; border-color:#B84332; color:#8C3223;
+  }
+  .status-extra{
+    margin-top:14px;
+  }
+  .status-extra .extra-label{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    display:block;
+    margin-bottom:6px;
+  }
+  .status-extra .extra-input{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    font-family:inherit;
+    font-size:14.5px;
+    color:var(--ink);
+  }
+
+  footer{
+    position:fixed;
+    bottom:0; left:0; right:0;
+    background:var(--paper);
+    border-top:1px solid var(--line);
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    display:flex;
+    gap:8px;
+  }
+  .btn{
+    flex:1;
+    padding:13px 10px;
+    border-radius:12px;
+    border:none;
+    font-family:inherit;
+    font-weight:600;
+    font-size:14px;
+    display:flex; align-items:center; justify-content:center; gap:7px;
+  }
+  .btn-primary{
+    background:#25D366;
+    color:#fff;
+  }
+  .btn-secondary{
+    background:var(--cream);
+    color:var(--pine);
+    border:1px solid var(--line);
+    flex:0 0 46px;
+  }
+  .toast{
+    position:fixed;
+    bottom:80px; left:50%;
+    transform:translateX(-50%);
+    background:var(--pine);
+    color:#fff;
+    padding:9px 16px;
+    border-radius:20px;
+    font-size:13px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease;
+  }
+  .toast.show{opacity:1;}
+  .photo-count-bar{
+    position:fixed;
+    bottom:64px; left:0; right:0;
+    text-align:center;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Cabañas Mountain View</div>
+  <h1>Ficha de inspección</h1>
+  <div class="field-row">
+    <div class="field">
+      <label for="cabana">Cabaña</label>
+      <select id="cabana"></select>
+    </div>
+    <div class="field">
+      <label for="inspector">Inspector</label>
+      <input id="inspector" type="text" placeholder="Tu nombre">
+    </div>
+  </div>
+  <div class="priority-tag" id="priorityTag" style="display:none;"></div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-top">
+    <span class="pct" id="pct">0%</span>
+    <span class="label" id="progressLabel">0 de 0 puntos revisados</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="summary-chips">
+    <span class="chip ok-chip" id="okChip">0 OK</span>
+    <span class="chip issue-chip" id="issueChip">0 problemas</span>
+  </div>
+</div>
+
+<main id="sections"></main>
+
+<div class="obs-block">
+  <label for="obs">Observaciones generales</label>
+  <textarea id="obs" placeholder="Notas adicionales, reparaciones pendientes, recomendaciones..."></textarea>
+</div>
+
+<div class="status-block">
+  <label>Estado general de la cabaña</label>
+  <div class="status-options">
+    <button type="button" class="status-btn" data-status="verde">
+      <span class="dot"></span> Operativa
+    </button>
+    <button type="button" class="status-btn" data-status="amarillo">
+      <span class="dot"></span> Con observación
+    </button>
+    <button type="button" class="status-btn" data-status="rojo">
+      <span class="dot"></span> Inhabilitada
+    </button>
+  </div>
+  <div class="status-extra" id="statusExtra"></div>
+</div>
+
+<footer>
+  <button class="btn btn-secondary" id="resetBtn" title="Nueva cabaña">↺</button>
+  <button class="btn btn-primary" id="waBtn">Enviar por WhatsApp</button>
+</footer>
+<div class="photo-count-bar" id="photoCount"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA = [
+  { key:"electrico", title:"Sistema Eléctrico", icon:"⚡", items:[
+    "Cuarto Luz",
+    "Baño Luz",
+    "Exterior Luz",
+    "Letrero Luz",
+    "Jacuzzi On",
+    "Lampara On",
+    "Frigobar On",
+    "Secadora On",
+    "Tomacorrientes",
+  ]},
+  { key:"sanitarios", title:"Sanitarios", icon:"🚿", items:[
+    "Inodoro",
+    "Lavadero",
+    "Jacuzzi",
+    "Ducha",
+    "Techo fuga",
+    "Pared Humedad",
+  ]},
+  { key:"estructura", title:"Estructura", icon:"🧱", items:[
+    "Puerta ingreso",
+    "Puerta baño",
+    "Puerta ducha",
+    "Estantes fijos",
+    "Techo cabaña",
+    "Piso estado",
+    "Sillas estado",
+    "Mesa estado",
+    "Cerco perimetrico",
+  ]},
+];
+
+const CABINS = [
+  { bloque:"Bloque I", cabins:[
+    {name:"KUYCHI", prioridad:"Maras"},
+    {name:"MUÑA", prioridad:"Maras"},
+    {name:"CHASKA", prioridad:"Maras"},
+    {name:"AUKI", prioridad:"Maras"},
+    {name:"UNU", prioridad:"Maras"},
+    {name:"WAYRA", prioridad:"Tippie"},
+    {name:"RITI", prioridad:"Suite Ancestral"},
+    {name:"INTI", prioridad:"Munay"},
+    {name:"WILLKA", prioridad:"Munay"},
+  ]},
+  { bloque:"Bloque II", cabins:[
+    {name:"RUMI", prioridad:"Munay"},
+    {name:"ALLPA", prioridad:"Munay"},
+    {name:"URPU", prioridad:"Munay"},
+    {name:"TAWA", prioridad:"Munay"},
+    {name:"KINTU", prioridad:"Munay"},
+    {name:"QORI", prioridad:"Munay"},
+    {name:"PUQYU", prioridad:"Munay"},
+    {name:"HATUN", prioridad:"Munay"},
+    {name:"CHUNKA", prioridad:"Munay"},
+    {name:"MUYU", prioridad:"Munay"},
+  ]},
+  { bloque:"Bloque III", cabins:[
+    {name:"QENTE", prioridad:"Munay"},
+    {name:"CHIRI CHIRI", prioridad:"Munay"},
+    {name:"APU", prioridad:"Suite"},
+    {name:"PAQPA", prioridad:"Munay"},
+    {name:"TUKU", prioridad:"Munay"},
+    {name:"CHAKRA", prioridad:"Munay"},
+    {name:"SONQO", prioridad:"Munay"},
+    {name:"WAKA", prioridad:"Suite"},
+    {name:"PUSAQ", prioridad:"Munay"},
+    {name:"AYLLU", prioridad:"Munay"},
+  ]},
+];
+
+function populateCabins(){
+  const sel = document.getElementById('cabana');
+  sel.innerHTML = '<option value="">Selecciona cabaña...</option>';
+  CABINS.forEach(group=>{
+    const og = document.createElement('optgroup');
+    og.label = group.bloque;
+    group.cabins.forEach(c=>{
+      const opt = document.createElement('option');
+      opt.value = c.name;
+      opt.dataset.prioridad = c.prioridad;
+      opt.textContent = c.name;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+  sel.addEventListener('change', ()=>{
+    const opt = sel.selectedOptions[0];
+    const tag = document.getElementById('priorityTag');
+    if(opt && opt.dataset.prioridad){
+      tag.style.display = 'inline-flex';
+      tag.textContent = 'Prioridad: ' + opt.dataset.prioridad;
+    } else {
+      tag.style.display = 'none';
+    }
+  });
+}
+
+// state[itemId] = 'ok' | 'obs' | 'na' | undefined
+const state = {};
+const notes = {};
+const photos = {}; // itemId -> File
+
+let generalStatus = null; // 'verde' | 'amarillo' | 'rojo'
+const statusExtra = { hours:'', date:'' };
+
+function renderStatusExtra(){
+  const container = document.getElementById('statusExtra');
+  container.innerHTML = '';
+  if(generalStatus === 'amarillo'){
+    container.innerHTML = `
+      <label class="extra-label">¿En cuántas horas se levanta la observación?</label>
+      <input type="number" min="0" step="0.5" placeholder="Ej. 4" class="extra-input" id="hoursInput">`;
+    const inp = document.getElementById('hoursInput');
+    inp.value = statusExtra.hours;
+    inp.addEventListener('input', ()=>{ statusExtra.hours = inp.value; });
+  } else if(generalStatus === 'rojo'){
+    container.innerHTML = `
+      <label class="extra-label">Fecha programada de mantenimiento</label>
+      <input type="date" class="extra-input" id="dateInput">`;
+    const inp = document.getElementById('dateInput');
+    inp.value = statusExtra.date;
+    inp.addEventListener('input', ()=>{ statusExtra.date = inp.value; });
+  }
+}
+
+document.querySelectorAll('.status-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    generalStatus = btn.dataset.status;
+    document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderStatusExtra();
+  });
+});
+
+function renderThumb(id, wrap){
+  const thumbWrap = wrap.querySelector('.photo-thumb-wrap');
+  thumbWrap.innerHTML = '';
+  const file = photos[id];
+  if(!file) return;
+  const url = URL.createObjectURL(file);
+  const thumb = document.createElement('div');
+  thumb.className = 'photo-thumb';
+  thumb.innerHTML = `<img src="${url}" alt=""><button type="button" class="rm">×</button>`;
+  thumb.querySelector('.rm').addEventListener('click', ()=>{
+    delete photos[id];
+    updatePhotoCount();
+    thumb.remove();
+  });
+  thumbWrap.appendChild(thumb);
+  updatePhotoCount();
+}
+
+function updatePhotoCount(){
+  const n = Object.keys(photos).length;
+  const el = document.getElementById('photoCount');
+  if(el) el.textContent = n>0 ? `📷 ${n} foto${n>1?'s':''} adjunta${n>1?'s':''}` : '';
+}
+
+function itemId(secKey, idx){ return secKey + "_" + idx; }
+
+function render(){
+  const container = document.getElementById('sections');
+  container.innerHTML = '';
+  DATA.forEach(sec => {
+    const details = document.createElement('details');
+    details.className = 'section';
+    details.open = true;
+
+    const summary = document.createElement('summary');
+    summary.innerHTML = `
+      <span class="sec-title"><span class="icon">${sec.icon}</span>${sec.title}</span>
+      <span class="sec-status">
+        <span id="status-${sec.key}"></span>
+        <span class="caret">›</span>
+      </span>`;
+    details.appendChild(summary);
+
+    sec.items.forEach((text, idx) => {
+      const id = itemId(sec.key, idx);
+      const row = document.createElement('div');
+      row.className = 'item';
+      row.id = 'row-' + id;
+      row.innerHTML = `
+        <span class="item-text">${text}</span>
+        <span class="btns">
+          <button type="button" class="btn-toggle" data-id="${id}" data-type="ok" title="OK">✓</button>
+          <button type="button" class="btn-toggle" data-id="${id}" data-type="obs" title="Observación">!</button>
+          <button type="button" class="btn-toggle" data-id="${id}" data-type="na" title="No aplica">–</button>
+        </span>`;
+      details.appendChild(row);
+    });
+
+    container.appendChild(details);
+  });
+
+  container.querySelectorAll('.btn-toggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.dataset.id;
+      const type = btn.dataset.type;
+      state[id] = (state[id] === type) ? undefined : type;
+      if(state[id] !== 'issue'){ delete notes[id]; }
+      updateAll();
+    });
+  });
+
+  updateAll();
+}
+
+function totalItems(){
+  return DATA.reduce((s,sec)=>s+sec.items.length,0);
+}
+
+function updateAll(){
+  let ok=0, obs=0, na=0;
+  DATA.forEach(sec=>{
+    let secOk=0, secObs=0, secNa=0;
+    sec.items.forEach((text, idx)=>{
+      const id = itemId(sec.key, idx);
+      const row = document.getElementById('row-'+id);
+      const okBtn = row.querySelector('[data-type="ok"]');
+      const obsBtn = row.querySelector('[data-type="obs"]');
+      const naBtn = row.querySelector('[data-type="na"]');
+      okBtn.classList.toggle('active-ok', state[id]==='ok');
+      obsBtn.classList.toggle('active-obs', state[id]==='obs');
+      naBtn.classList.toggle('active-na', state[id]==='na');
+
+      let wrap = row.querySelector('.obs-extra');
+      if(state[id]==='obs'){
+        row.classList.add('has-note');
+        if(!wrap){
+          wrap = document.createElement('div');
+          wrap.className = 'obs-extra';
+          wrap.innerHTML = `
+            <input type="text" class="note-input" placeholder="Describe la observación...">
+            <div class="photo-row">
+              <label class="photo-btn">📷<input type="file" accept="image/*" capture="environment" class="photo-input" hidden></label>
+              <div class="photo-thumb-wrap"></div>
+            </div>`;
+          row.appendChild(wrap);
+          const noteEl = wrap.querySelector('.note-input');
+          noteEl.value = notes[id] || '';
+          noteEl.addEventListener('input', ()=>{ notes[id]=noteEl.value; });
+          const fileInput = wrap.querySelector('.photo-input');
+          fileInput.addEventListener('change', (e)=>{
+            const file = e.target.files[0];
+            if(file){ photos[id] = file; renderThumb(id, wrap); }
+          });
+          if(photos[id]) renderThumb(id, wrap);
+        }
+        secObs++; obs++;
+      } else {
+        row.classList.remove('has-note');
+        if(wrap) wrap.remove();
+        if(state[id]==='ok'){ secOk++; ok++; }
+        else if(state[id]==='na'){ secNa++; na++; }
+      }
+    });
+    const statusEl = document.getElementById('status-'+sec.key);
+    const total = sec.items.length;
+    const revisados = secOk+secObs+secNa;
+    if(revisados===0){
+      statusEl.textContent = `0/${total}`;
+    } else if(secObs>0){
+      statusEl.innerHTML = `<span style="color:var(--issue)">${secObs} obs.</span>`;
+    } else {
+      statusEl.innerHTML = `<span style="color:var(--ok)">${revisados}/${total} ✓</span>`;
+    }
+  });
+
+  const total = totalItems();
+  const done = ok+obs+na;
+  const pct = total? Math.round((done/total)*100) : 0;
+  document.getElementById('pct').textContent = pct + '%';
+  document.getElementById('progressLabel').textContent = `${done} de ${total} puntos revisados`;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('okChip').textContent = ok + ' OK';
+  document.getElementById('issueChip').textContent = obs + ' observaciones';
+}
+
+function todayStr(){
+  const d = new Date();
+  return d.toLocaleDateString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+
+function statusLine(){
+  if(generalStatus === 'verde') return '🟢 *Estado: Operativa - Disponible*';
+  if(generalStatus === 'amarillo'){
+    const h = statusExtra.hours ? `${statusExtra.hours} hora(s)` : 'por definir';
+    return `🟡 *Estado: Con observaciones — se levanta en ${h}*`;
+  }
+  if(generalStatus === 'rojo'){
+    const d = statusExtra.date ? statusExtra.date.split('-').reverse().join('/') : 'por definir';
+    return `🔴 *Estado: Inhabilitada — mantenimiento programado para ${d}*`;
+  }
+  return '⚪ *Estado: sin definir*';
+}
+
+function buildReport(){
+  const cabSel = document.getElementById('cabana');
+  const cabana = cabSel.value || 'Sin especificar';
+  const prioridad = cabSel.selectedOptions[0] ? cabSel.selectedOptions[0].dataset.prioridad : '';
+  const inspector = document.getElementById('inspector').value.trim() || 'Sin especificar';
+  const obsGeneral = document.getElementById('obs').value.trim();
+
+  let ok=0, obs=0, na=0, pending=0;
+  let lines = [];
+  lines.push(`*Inspección Mountain View*`);
+  lines.push(`Cabaña: ${cabana}${prioridad ? ` (${prioridad})` : ''}`);
+  lines.push(statusLine());
+  lines.push(`Inspector: ${inspector}`);
+  lines.push(`Fecha: ${todayStr()}`);
+  lines.push('');
+
+  DATA.forEach(sec=>{
+    let secLines = [];
+    sec.items.forEach((text, idx)=>{
+      const id = itemId(sec.key, idx);
+      if(state[id]==='ok'){ ok++; }
+      else if(state[id]==='na'){ na++; }
+      else if(state[id]==='obs'){
+        obs++;
+        const note = notes[id] ? ` — ${notes[id]}` : '';
+        const photoTag = photos[id] ? ' 📷' : '';
+        secLines.push(`  ⚠ ${text}${note}${photoTag}`);
+      } else {
+        pending++;
+      }
+    });
+    if(secLines.length){
+      lines.push(`*${sec.icon} ${sec.title}*`);
+      lines.push(...secLines);
+      lines.push('');
+    }
+  });
+
+  const total = totalItems();
+  lines.push(`Resumen: ${ok}/${total} OK, ${obs} con observación, ${na} no aplica${pending? `, ${pending} sin revisar`:''}.`);
+  if(obsGeneral){
+    lines.push('');
+    lines.push(`*Observaciones generales:*`);
+    lines.push(obsGeneral);
+  }
+  return lines.join('\n');
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+document.getElementById('waBtn').addEventListener('click', async ()=>{
+  const text = buildReport();
+  const files = Object.values(photos);
+
+  if(files.length && navigator.canShare && navigator.canShare({ files })){
+    try{
+      await navigator.share({ text, files, title:'Inspección Mountain View' });
+      return;
+    }catch(err){
+      if(err && err.name === 'AbortError') return; // user cancelled, do nothing
+      // otherwise fall through to text-only link below
+    }
+  }
+
+  const url = 'https://wa.me/?text=' + encodeURIComponent(text);
+  window.open(url, '_blank');
+  if(files.length){
+    showToast('Fotos no adjuntadas — envíalas aparte en el chat');
+  }
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(!confirm('¿Empezar una nueva ficha? Se borrará lo llenado.')) return;
+  Object.keys(state).forEach(k=>delete state[k]);
+  Object.keys(notes).forEach(k=>delete notes[k]);
+  Object.keys(photos).forEach(k=>delete photos[k]);
+  generalStatus = null;
+  statusExtra.hours = '';
+  statusExtra.date = '';
+  document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('active'));
+  renderStatusExtra();
+  document.getElementById('cabana').value='';
+  document.getElementById('priorityTag').style.display='none';
+  document.getElementById('obs').value='';
+  updatePhotoCount();
+  render();
+  showToast('Ficha reiniciada');
+});
+
+populateCabins();
+render();
+</script>
+</body>
+</html>
