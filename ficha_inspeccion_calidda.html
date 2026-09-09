@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cálidda · Ficha de Inspección de Sedes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-950:#0c1e30;
+    --navy-900:#122d47;
+    --navy-800:#1b3f5f;
+    --flame-600:#d9622b;
+    --flame-500:#e8763f;
+    --ok-600:#2f8f63;
+    --ok-100:#e3f3ea;
+    --warn-600:#b8501f;
+    --warn-100:#fbe8dd;
+    --na-600:#6b7684;
+    --na-100:#eceef0;
+    --paper:#f6f4ef;
+    --card:#ffffff;
+    --ink-900:#152131;
+    --ink-600:#4c5866;
+    --ink-400:#8b95a1;
+    --line:#e4e1d8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink-900);
+    font-family:'IBM Plex Sans',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .header{
+    background:linear-gradient(135deg,var(--navy-950) 0%,var(--navy-800) 100%);
+    color:#fff;
+    padding:26px 22px 0;
+    position:relative;
+    overflow:hidden;
+  }
+  .header::after{
+    content:"";
+    position:absolute;
+    right:-60px; top:-60px;
+    width:220px; height:220px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(232,118,63,.35) 0%,rgba(232,118,63,0) 70%);
+  }
+  .eyebrow{
+    display:flex; align-items:center; gap:8px;
+    font-size:12.5px; letter-spacing:.02em;
+    color:#c7d6e2;
+    margin-bottom:10px;
+  }
+  .flame-dot{width:7px;height:7px;border-radius:50%;background:var(--flame-500);flex-shrink:0;}
+  h1{
+    font-family:'Source Serif 4',serif;
+    font-weight:600;
+    font-size:24px;
+    line-height:1.15;
+    margin:0 0 18px;
+    position:relative;
+  }
+  .field-row{
+    display:flex; flex-direction:column; gap:12px;
+    position:relative;
+  }
+  .field label{
+    display:block;
+    font-size:11.5px;
+    color:#b7c6d4;
+    margin-bottom:6px;
+  }
+  select,input[type=text]{
+    width:100%;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.22);
+    color:#fff;
+    padding:12px 13px;
+    border-radius:9px;
+    font-size:15px;
+    font-family:inherit;
+    appearance:none;
+  }
+  select option{color:#111;}
+  input::placeholder{color:#9fb0c0;}
+  .sede-meta{
+    margin-top:8px;
+    font-size:12.5px;
+    color:#cfe0ec;
+    display:none;
+    line-height:1.5;
+  }
+  .sede-meta.show{display:block;}
+  .sede-meta b{color:#fff;}
+  .load-banner{
+    display:none;
+    margin-top:10px;
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:9px;
+    padding:9px 12px;
+    font-size:12.5px;
+    color:#e9f1f7;
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .load-banner.show{display:flex;}
+  .load-banner button{
+    background:var(--flame-500); border:none; color:#fff;
+    font-size:12px; font-weight:600; padding:6px 10px; border-radius:7px;
+  }
+
+  .tabs{
+    display:flex; gap:2px;
+    margin-top:20px;
+    padding-bottom:0;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    flex:0 0 auto;
+    text-align:center;
+    font-size:12px; font-weight:600;
+    color:#9db1c2;
+    padding:12px 10px 14px;
+    border-bottom:2.5px solid transparent;
+    white-space:nowrap;
+  }
+  .tab.active{color:#fff; border-color:var(--flame-500);}
+
+  .summary{
+    margin:-1px 16px 0;
+    background:var(--card);
+    border-radius:14px;
+    box-shadow:0 10px 26px -14px rgba(12,30,48,.35);
+    padding:20px 20px 18px;
+    position:relative;
+    z-index:2;
+    margin-top:16px;
+  }
+  .summary-top{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:12px;
+  }
+  .pct{
+    font-family:'Source Serif 4',serif;
+    font-size:36px; font-weight:600;
+    color:var(--navy-950);
+  }
+  .pct-label{
+    font-size:12.5px; color:var(--ink-600); text-align:right;
+  }
+  .bar-track{
+    height:6px; border-radius:4px; background:var(--line); overflow:hidden;
+  }
+  .bar-fill{
+    height:100%; width:0%; background:linear-gradient(90deg,var(--navy-800),var(--flame-500));
+    transition:width .35s ease;
+  }
+  .chips{display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;}
+  .chip{
+    font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:20px;
+  }
+  .chip.ok{background:var(--ok-100); color:var(--ok-600);}
+  .chip.warn{background:var(--warn-100); color:var(--warn-600);}
+  .chip.save{background:var(--na-100); color:var(--ink-600);}
+
+  .content{padding:18px 16px 120px;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .category{
+    background:var(--card);
+    border-radius:14px;
+    margin-bottom:14px;
+    box-shadow:0 6px 18px -14px rgba(12,30,48,.3);
+    overflow:hidden;
+    border:1px solid #eeece3;
+  }
+  .cat-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .cat-head-left{display:flex; align-items:center; gap:12px;}
+  .cat-icon{
+    width:34px;height:34px;border-radius:9px;
+    background:var(--navy-950);
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;
+    flex-shrink:0;
+  }
+  .cat-title{font-size:15.5px; font-weight:600; color:var(--navy-950);}
+  .cat-sub{font-size:12px; color:var(--ink-400); margin-top:1px;}
+  .chev{transition:transform .2s ease; color:var(--ink-400); margin-left:8px;}
+  .cat-head.open .chev{transform:rotate(180deg);}
+  .cat-body{max-height:0; overflow:hidden; transition:max-height .3s ease;}
+  .item{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 18px;
+    border-top:1px solid #f0eee5;
+    gap:10px;
+  }
+  .item-name{font-size:14.5px; color:var(--ink-900);}
+  .btns{display:flex; gap:7px; flex-shrink:0;}
+  .btn{
+    width:38px; height:38px; border-radius:9px;
+    border:1.5px solid var(--line);
+    background:#fff;
+    font-size:15px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-400);
+  }
+  .btn.ok.active{background:var(--ok-600); border-color:var(--ok-600); color:#fff;}
+  .btn.warn.active{background:var(--warn-600); border-color:var(--warn-600); color:#fff;}
+  .btn.na.active{background:var(--na-600); border-color:var(--na-600); color:#fff;}
+  .btn.doc.active{background:var(--ok-600); border-color:var(--ok-600); color:#fff;}
+  .btn.wide{width:auto; padding:0 14px; font-size:12.5px; font-weight:600;}
+
+  /* Proveedores */
+  .prov-card{
+    background:var(--card); border-radius:14px; border:1px solid #eeece3;
+    padding:16px 18px; margin-bottom:12px;
+    box-shadow:0 6px 18px -14px rgba(12,30,48,.3);
+  }
+  .prov-card.dim{opacity:.55;}
+  .prov-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .prov-rubro{font-size:11.5px; color:var(--ink-400); text-transform:uppercase; letter-spacing:.02em;}
+  .prov-name{font-family:'Source Serif 4',serif; font-size:16.5px; font-weight:600; color:var(--navy-950); margin-top:2px;}
+  .prov-badge{font-size:11px; font-weight:700; padding:4px 9px; border-radius:20px; white-space:nowrap;}
+  .prov-badge.alta{background:var(--warn-100); color:var(--warn-600);}
+  .prov-badge.media{background:#fdf3d8; color:#9c7a12;}
+  .prov-badge.baja{background:var(--na-100); color:var(--ink-600);}
+  .prov-meta{font-size:13px; color:var(--ink-600); margin-top:10px; line-height:1.6;}
+  .prov-tag{
+    display:inline-block; margin-top:2px; font-size:12px;
+    color:var(--flame-600); font-weight:600;
+  }
+
+  /* Mobiliario */
+  .mob-box{
+    margin-top:10px;
+  }
+  .mob-box textarea{
+    width:100%; min-height:56px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.22);
+    color:#fff; border-radius:9px;
+    padding:10px 12px; font-size:13px;
+    font-family:inherit; resize:vertical;
+  }
+  .mob-box textarea::placeholder{color:#9fb0c0;}
+
+  /* Mantenimientos */
+  .mtto-summary{
+    display:flex; gap:10px; margin-bottom:14px;
+  }
+  .mtto-stat{
+    flex:1; background:var(--card); border-radius:12px; padding:12px 14px;
+    border:1px solid #eeece3; text-align:center;
+  }
+  .mtto-stat .num{font-family:'Source Serif 4',serif; font-size:22px; font-weight:600; color:var(--navy-950);}
+  .mtto-stat .lbl{font-size:11px; color:var(--ink-400); margin-top:2px;}
+  .mtto-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:13px 16px; border-top:1px solid #f0eee5; gap:10px;
+  }
+  .mtto-name{font-size:14px; color:var(--ink-900);}
+  .mtto-freq{font-size:11.5px; color:var(--ink-400); margin-top:2px;}
+  .toggle{
+    width:52px; height:30px; border-radius:16px;
+    background:var(--na-100); border:1.5px solid var(--line);
+    position:relative; flex-shrink:0;
+  }
+  .toggle.active{background:var(--ok-600); border-color:var(--ok-600);}
+  .toggle .knob{
+    position:absolute; top:2px; left:2px;
+    width:23px; height:23px; border-radius:50%; background:#fff;
+    transition:left .18s ease; box-shadow:0 1px 3px rgba(0,0,0,.25);
+  }
+  .toggle.active .knob{left:23px;}
+
+  /* Proveedor logs */
+  .prov-actions{display:flex; gap:8px; margin-top:12px;}
+  .prov-action-btn{
+    flex:1; font-size:12px; font-weight:600; padding:8px 6px;
+    border-radius:8px; border:1.5px solid var(--line); background:#fff; color:var(--navy-900);
+  }
+  .prov-log-form{
+    display:none; margin-top:10px; background:var(--paper);
+    border-radius:9px; padding:10px; gap:8px; flex-direction:column;
+  }
+  .prov-log-form.show{display:flex;}
+  .prov-log-form input{
+    border:1px solid var(--line); border-radius:7px; padding:8px 10px; font-size:13px; font-family:inherit;
+  }
+  .prov-log-form .row{display:flex; gap:8px;}
+  .prov-log-save{
+    background:var(--navy-950); color:#fff; border:none; border-radius:7px;
+    font-size:12.5px; font-weight:600; padding:8px;
+  }
+  .prov-log-list{margin-top:10px; font-size:12px; color:var(--ink-600);}
+  .prov-log-item{padding:6px 0; border-top:1px dashed var(--line);}
+
+  /* Nuevos Negocios */
+  .nn-form{
+    background:var(--card); border-radius:14px; border:1px solid #eeece3;
+    padding:16px 18px; margin-bottom:16px;
+  }
+  .nn-form input, .nn-form select{
+    width:100%; border:1px solid var(--line); border-radius:8px;
+    padding:10px 12px; font-size:14px; font-family:inherit; margin-bottom:9px;
+  }
+  .nn-form button{
+    width:100%; background:var(--navy-950); color:#fff; border:none;
+    border-radius:8px; padding:11px; font-size:14px; font-weight:600;
+  }
+  .nn-card{
+    background:var(--card); border-radius:14px; border:1px solid #eeece3;
+    padding:14px 18px; margin-bottom:10px;
+    box-shadow:0 6px 18px -14px rgba(12,30,48,.3);
+  }
+  .nn-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .nn-name{font-family:'Source Serif 4',serif; font-size:15.5px; font-weight:600; color:var(--navy-950);}
+  .nn-dir{font-size:12.5px; color:var(--ink-600); margin-top:2px;}
+  .nn-date{font-size:11.5px; color:var(--ink-400); margin-top:6px;}
+  .nn-status{
+    font-size:11px; font-weight:700; padding:5px 10px; border-radius:20px; white-space:nowrap;
+    border:none;
+  }
+  .nn-status.pendiente{background:var(--warn-100); color:var(--warn-600);}
+  .nn-status.proceso{background:#fdf3d8; color:#9c7a12;}
+  .nn-status.implementado{background:var(--ok-100); color:var(--ok-600);}
+  .nn-del{background:none; border:none; color:var(--ink-400); font-size:16px; padding:0 4px;}
+
+  /* Historial */
+  .hist-empty{text-align:center; color:var(--ink-400); font-size:13.5px; padding:40px 20px;}
+  .hist-card{
+    background:var(--card); border-radius:14px; border:1px solid #eeece3;
+    padding:14px 18px; margin-bottom:10px;
+    display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 6px 18px -14px rgba(12,30,48,.3);
+  }
+  .hist-left .hist-sede{font-weight:600; font-size:14.5px; color:var(--navy-950);}
+  .hist-left .hist-date{font-size:12px; color:var(--ink-400); margin-top:2px;}
+  .hist-right{font-family:'Source Serif 4',serif; font-size:20px; font-weight:600; color:var(--flame-600);}
+
+  .footer{
+    position:fixed; bottom:0; left:0; right:0;
+    background:#fff;
+    border-top:1px solid var(--line);
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    display:flex; gap:10px;
+  }
+  .reset-btn{
+    width:48px; flex-shrink:0;
+    border-radius:11px; border:1.5px solid var(--line);
+    background:#fff; color:var(--ink-600); font-size:18px;
+  }
+  .save-btn{
+    width:52px; flex-shrink:0;
+    border-radius:11px; border:1.5px solid var(--line);
+    background:#fff; color:var(--navy-900); font-size:13.5px; font-weight:700;
+  }
+  .send-btn{
+    flex:1;
+    border:none; border-radius:11px;
+    background:linear-gradient(135deg,var(--navy-950),var(--navy-800));
+    color:#fff; font-size:15px; font-weight:600;
+    letter-spacing:.01em;
+    padding:0 14px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .send-btn:active{opacity:.9;}
+  .toast{
+    position:fixed; bottom:88px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--navy-950); color:#fff; font-size:13px; font-weight:600;
+    padding:10px 18px; border-radius:20px; opacity:0; pointer-events:none;
+    transition:all .25s ease; z-index:50;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow"><span class="flame-dot"></span> CÁLIDDA · GESTIÓN DE SEDES</div>
+  <h1>Ficha de inspección de unidades</h1>
+  <div class="field-row">
+    <div class="field">
+      <label for="sede">Sede</label>
+      <select id="sede" onchange="onSedeChange()">
+        <option value="">Selecciona sede...</option>
+      </select>
+      <div class="sede-meta" id="sedeMeta"></div>
+      <div class="load-banner" id="loadBanner">
+        <span id="loadBannerText"></span>
+        <button onclick="loadSavedRecord()">Cargar</button>
+      </div>
+      <div class="mob-box">
+        <label style="font-size:11.5px;color:#b7c6d4;display:block;margin-bottom:5px;">Materiales del mobiliario (sede)</label>
+        <textarea id="mobiliario" placeholder="Ej: melamine, vidrio templado, acero inoxidable, módulos..." onchange="scheduleAutosave()"></textarea>
+      </div>
+    </div>
+    <div style="display:flex; gap:12px;">
+      <div class="field" style="flex:1;">
+        <label for="inspector">Inspector (JC)</label>
+        <input type="text" id="inspector" placeholder="Tu nombre" onchange="scheduleAutosave()">
+      </div>
+      <div class="field" style="flex:1;">
+        <label for="fecha">Fecha</label>
+        <input type="text" id="fecha" readonly>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" id="tabBtn-inspeccion" onclick="showTab('inspeccion')">Inspección</div>
+    <div class="tab" id="tabBtn-documentacion" onclick="showTab('documentacion')">Documentos</div>
+    <div class="tab" id="tabBtn-proveedores" onclick="showTab('proveedores')">Proveedores</div>
+    <div class="tab" id="tabBtn-mantenimientos" onclick="showTab('mantenimientos')">Mantenimientos</div>
+    <div class="tab" id="tabBtn-nn" onclick="showTab('nn')">Nuevos Negocios</div>
+    <div class="tab" id="tabBtn-historial" onclick="showTab('historial')">Historial</div>
+  </div>
+</div>
+
+<div class="summary" id="summaryBar">
+  <div class="summary-top">
+    <div class="pct" id="pctText">0%</div>
+    <div class="pct-label" id="pctLabel">0 de 0 puntos revisados</div>
+  </div>
+  <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+  <div class="chips">
+    <div class="chip ok" id="chipOk">0 OK</div>
+    <div class="chip warn" id="chipWarn">0 observaciones</div>
+    <div class="chip save" id="chipSave">Sin guardar</div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="panel active" id="panel-inspeccion"></div>
+  <div class="panel" id="panel-documentacion"></div>
+  <div class="panel" id="panel-proveedores"></div>
+  <div class="panel" id="panel-mantenimientos"></div>
+  <div class="panel" id="panel-nn"></div>
+  <div class="panel" id="panel-historial"></div>
+</div>
+
+<div class="footer">
+  <button class="reset-btn" onclick="resetAll()" title="Reiniciar">↺</button>
+  <button class="save-btn" onclick="saveRecord(true)" title="Guardar">💾</button>
+  <button class="send-btn" onclick="sendWhatsApp()">Enviar por WhatsApp ›</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SEDES = [
+  {id:'CA-01', sede:'San Miguel', formato:'Tienda', ubicacion:'Plaza San Miguel', direccion:'Av. La Marina 2000 - San Miguel', zona:'Centro/Oeste', visita:'Jueves'},
+  {id:'CA-02', sede:'San Miguel', formato:'Centro de atención', ubicacion:'Local propio', direccion:'Av. La Marina 2521 - San Miguel', zona:'Centro/Oeste', visita:'Jueves'},
+  {id:'CA-03', sede:'San Juan de Lurigancho', formato:'Tienda', ubicacion:'Mall Aventura', direccion:'Av. Lurigancho 997, SJL', zona:'Este', visita:'Martes'},
+  {id:'CA-04', sede:'San Juan de Lurigancho', formato:'Centro de atención', ubicacion:'Local propio', direccion:'Av. Próceres de la Independencia 1881 - SJL', zona:'Este', visita:'Martes'},
+  {id:'CA-05', sede:'Santiago de Surco', formato:'Tienda', ubicacion:'Grifo Primax', direccion:'Av. Benavides cruce con Av. Circunvalación', zona:'Sur', visita:'Lunes'},
+  {id:'CA-06', sede:'Santiago de Surco', formato:'Centro de atención', ubicacion:'Local propio', direccion:'Av. Benavides 4374 - Surco', zona:'Sur', visita:'Lunes'},
+  {id:'CA-07', sede:'Villa María del Triunfo', formato:'Centro de atención', ubicacion:'Real Plaza', direccion:'Av. Pachacútec con Av. 26 de Noviembre', zona:'Sur', visita:'Lunes'},
+  {id:'CA-08', sede:'Comas', formato:'Centro de atención', ubicacion:'Local propio', direccion:'Av. Túpac Amaru 5843 - Comas', zona:'Norte', visita:'Miércoles'},
+  {id:'CA-09', sede:'Independencia', formato:'Tienda', ubicacion:'MegaPlaza', direccion:'Av. Alfredo Mendiola 3698, Independencia', zona:'Norte', visita:'Miércoles'},
+  {id:'CA-10', sede:'Los Olivos', formato:'Centro de atención', ubicacion:'Local propio', direccion:'Av. Carlos Izaguirre 540 - Los Olivos', zona:'Norte', visita:'Miércoles'},
+];
+
+const CATEGORIES = [
+  {icon:'⚡', title:'Eléctrico y Energía', items:[
+    'Tableros eléctricos de baja tensión','Puesta a tierra','Grupo electrógeno','Subestación eléctrica'
+  ]},
+  {icon:'💡', title:'Iluminación y Fachada', items:[
+    'Iluminación comercial (tienda)','Iluminación de emergencia','Letrero de fachada','Tótem publicitario'
+  ]},
+  {icon:'🧯', title:'Seguridad y Contra Incendio', items:[
+    'Extintores (vigencia / recarga)','Detección y alarmas contra incendio','Sistema de intrusión (alarma robo)','Cámaras CCTV'
+  ]},
+  {icon:'❄️', title:'Climatización e Instalaciones', items:[
+    'Aire acondicionado','Sistema de presión constante','Cisternas de agua','Servicios higiénicos'
+  ]},
+  {icon:'🏢', title:'Infraestructura y Accesos', items:[
+    'Puertas enrollables / metálicas','Puertas vaivén de vidrio','Techos (calaminas / canaletas)','Mobiliario general','Pisos, paredes y pintura'
+  ]},
+];
+
+const DOC_SYSTEMS = [
+  {icon:'🧯', title:'Extinción de Incendio (ACI)', docs:['Informe de mantenimiento','Protocolos de pruebas','Certificado de operatividad','Memoria descriptiva ACI']},
+  {icon:'🚨', title:'Detección de Incendio (SDI)', docs:['Informe de mantenimiento','Protocolos de pruebas','Certificado de operatividad','Memoria descriptiva SDI']},
+  {icon:'🔌', title:'Tableros Eléctricos', docs:['Informe de mantenimiento','Certificado de operatividad','Protocolos de pruebas','Memoria descriptiva II.EE']},
+  {icon:'🌐', title:'Puestas a Tierra', docs:['Informe de mantenimiento','Protocolos de pruebas','Certificado de operatividad','Memoria descriptiva II.EE']},
+  {icon:'💡', title:'Luces de Emergencia', docs:['Informe de mantenimiento','Certificado de operatividad','Memoria descriptiva de seguridad']},
+  {icon:'⚙️', title:'Subestación Eléctrica', docs:['Informe de mantenimiento','Protocolos de pruebas','Certificado de operatividad','Memoria descriptiva II.EE']},
+  {icon:'🛗', title:'Ascensores / Escaleras Eléctricas', docs:['Informe de mantenimiento','Certificado de operatividad','Memoria descriptiva de equipos']},
+  {icon:'🧯', title:'Extintores de Sede', docs:['Informe de mantenimiento','Protocolos de pruebas','Certificado de operatividad','Memoria descriptiva de seguridad']},
+];
+
+const PROVIDERS = [
+  {id:'PE-01', rubro:'Sub-estación', prioridad:'Media', nombre:'RQF Electro Service S.A.C.', direccion:'Jr. Jorge Chávez 155, Breña', telefono:'998 278 648', sedes:['CA-02','CA-04']},
+  {id:'PE-01', rubro:'Sub-estación', prioridad:'Media', nombre:'Menautt Electric S.A.C.', direccion:'Chanchamayo 15122, Puente Piedra', telefono:'947 543 748', sedes:[]},
+  {id:'PE-01', rubro:'Sub-estación', prioridad:'Media', nombre:'GEEEC Ingenieros', direccion:'Calle Las Camelias 877 Of. 302, San Isidro', telefono:'01 414 2727', sedes:[]},
+  {id:'PE-02', rubro:'Extinción de incendio (ACI)', prioridad:'Alta', nombre:'Genesal Energy', direccion:'Av. Los Faisanes 170, La Campiña, Chorrillos', telefono:'966 372 663', sedes:[]},
+  {id:'PE-03', rubro:'Grupo electrógeno', prioridad:'Alta', nombre:'Genesal Energy', direccion:'Av. Los Faisanes 170, La Campiña, Chorrillos', telefono:'966 372 663', sedes:['CA-01']},
+  {id:'PE-04', rubro:'Detección de incendio (SDI)', prioridad:'Alta', nombre:'Arkhos Ingeniería', direccion:'Av. Juan Nicolini 242, Urb. Sol de Lima, SMP', telefono:'962 387 549', sedes:['CA-03']},
+  {id:'PE-05', rubro:'Tableros eléctricos y PAT', prioridad:'Alta', nombre:'Encor S.A.C.', direccion:'Urb. Las Sensitivas 537, Urb. Las Flores, SJL', telefono:'996 976 599', sedes:['CA-06','CA-07']},
+  {id:'PE-05', rubro:'Tableros eléctricos y PAT', prioridad:'Alta', nombre:'Glave Ingenieros', direccion:'Ca. Manuel Wagner 428, Zona B, SJM', telefono:'995 505 639', sedes:['CA-01','CA-05']},
+  {id:'PE-06', rubro:'Iluminación general', prioridad:'Media', nombre:"Connie's S.A.C.", direccion:'—', telefono:'—', sedes:['CA-01','CA-02','CA-03','CA-04','CA-08','CA-09','CA-10']},
+  {id:'PE-07', rubro:'Aire acondicionado', prioridad:'Media', nombre:'Friotemp', direccion:'Ca. José Mariano Arce 493, Pueblo Libre', telefono:'989 316 332', sedes:['CA-05','CA-06','CA-07']},
+  {id:'PE-08', rubro:'Sistemas sanitarios', prioridad:'Media', nombre:'Roka Inmuebles Generales', direccion:'Ca. Albizia 220, Surco', telefono:'998 225 186', sedes:[]},
+  {id:'PE-09', rubro:'Albañilería y pintura', prioridad:'Baja', nombre:'Roka Inmuebles Generales', direccion:'Ca. Albizia 220, Surco', telefono:'998 225 186', sedes:['CA-03','CA-08']},
+  {id:'PE-10', rubro:'INDECI (extintores, señalética, luces emergencia)', prioridad:'Alta', nombre:'Licitación · 3 proveedores', direccion:'—', telefono:'—', sedes:['CA-01','CA-02','CA-03','CA-04','CA-05','CA-06','CA-08','CA-09','CA-10']},
+  {id:'PE-11', rubro:'CCTV / Seguridad', prioridad:'Alta', nombre:'G4S – Verisure', direccion:'—', telefono:'—', sedes:[]},
+  {id:'PE-12', rubro:'Sistema de intrusión', prioridad:'Alta', nombre:'G4S – Verisure', direccion:'—', telefono:'—', sedes:[]},
+  {id:'PE-13', rubro:'Seguridad física', prioridad:'Media', nombre:'Licitación en curso', direccion:'—', telefono:'—', sedes:[]},
+  {id:'PE-14', rubro:'Limpieza de sedes', prioridad:'Alta', nombre:'Limpet', direccion:'—', telefono:'—', sedes:[]},
+  {id:'PE-15', rubro:'Limpieza de fachadas', prioridad:'Media', nombre:'Limpet', direccion:'—', telefono:'—', sedes:[]},
+  {id:'PE-16', rubro:'Mantenimiento de cisternas', prioridad:'Media', nombre:'Limpet', direccion:'—', telefono:'—', sedes:[]},
+  {id:'PE-17', rubro:'Fumigación', prioridad:'Media', nombre:'Limpet', direccion:'—', telefono:'—', sedes:[]},
+  {id:'PE-18', rubro:'Desratización', prioridad:'Baja', nombre:'Limpet', direccion:'—', telefono:'—', sedes:[]},
+];
+
+const MANTTO_SISTEMAS = [
+  {name:'Eléctrico de baja tensión (tableros)', freq:'Anual'},
+  {name:'Iluminación comercial (tienda)', freq:'Semestral / Anual'},
+  {name:'Iluminación de emergencia', freq:'Anual'},
+  {name:'Tótem de iluminación', freq:'Anual'},
+  {name:'Letrero de fachada', freq:'Anual'},
+  {name:'Limpieza de fachadas', freq:'Anual'},
+  {name:'Grupos electrógenos', freq:'Anual'},
+  {name:'Contra incendio (motor, bomba, gabinetes)', freq:'Anual'},
+  {name:'Detección y alarmas contra incendio', freq:'Anual'},
+  {name:'Aire acondicionado', freq:'Semestral'},
+  {name:'Presión constante (electrobombas)', freq:'Semestral'},
+  {name:'Limpieza de cisternas', freq:'Semestral'},
+  {name:'Servicios higiénicos', freq:'Trimestral'},
+  {name:'Puertas enrollables', freq:'Anual'},
+  {name:'Puertas / rejas metálicas', freq:'Anual'},
+  {name:'Puertas vaivén de vidrio', freq:'Anual'},
+  {name:'Mobiliario en general', freq:'Semestral'},
+  {name:'Techos (calaminas / canaletas)', freq:'Mensual'},
+  {name:'Showroom / estacionamientos (pintado)', freq:'Semestral'},
+  {name:'Infraestructura (pisos / paredes)', freq:'Bimensual'},
+  {name:'Recarga de extintores', freq:'Anual'},
+  {name:'Sistema de intrusión', freq:'Anual'},
+  {name:'CCTV', freq:'Anual'},
+];
+
+let currentSede = null;
+let manttoState = {};   // key: idx -> true/false (ejecutado este mes)
+let nnItems = [];        // {id, nombre, direccion, estado, fecha}
+let inspState = {};   // key: ci-ii -> 'ok'|'warn'|'na'
+let docState = {};    // key: si-di -> 'ok'|'na'
+let totalInspItems = 0;
+let totalDocItems = 0;
+let autosaveTimer = null;
+let dirty = false;
+
+function fmtDate(d){
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  return `${dd}/${mm}/${d.getFullYear()}`;
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+function buildSedeOptions(){
+  const sel = document.getElementById('sede');
+  SEDES.forEach(s=>{
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = `${s.id} · ${s.sede} — ${s.formato} (${s.ubicacion})`;
+    sel.appendChild(opt);
+  });
+}
+
+async function onSedeChange(){
+  const id = document.getElementById('sede').value;
+  const meta = document.getElementById('sedeMeta');
+  const banner = document.getElementById('loadBanner');
+  const s = SEDES.find(x=>x.id===id);
+  currentSede = s || null;
+  if(!s){
+    meta.classList.remove('show');
+    banner.classList.remove('show');
+    return;
+  }
+  meta.innerHTML = `<b>${s.direccion}</b><br>Zona ${s.zona} · Visita programada: ${s.visita}`;
+  meta.classList.add('show');
+  resetAll(false);
+  renderProviders();
+  await loadMantto();
+  // check for a saved record for this sede
+  try{
+    const res = await window.storage.get(`latest:${s.id}`, false);
+    if(res && res.value){
+      const rec = JSON.parse(res.value);
+      document.getElementById('loadBannerText').textContent = `Hay una inspección guardada del ${rec.fecha}`;
+      banner.classList.add('show');
+    } else {
+      banner.classList.remove('show');
+    }
+  }catch(e){
+    banner.classList.remove('show');
+  }
+}
+
+async function loadSavedRecord(){
+  if(!currentSede) return;
+  try{
+    const res = await window.storage.get(`latest:${currentSede.id}`, false);
+    if(res && res.value){
+      const rec = JSON.parse(res.value);
+      inspState = rec.insp || {};
+      docState = rec.doc || {};
+      document.getElementById('inspector').value = rec.inspector || '';
+      document.getElementById('fecha').value = rec.fecha || fmtDate(new Date());
+      document.getElementById('mobiliario').value = rec.mobiliario || '';
+      renderInspection();
+      renderDocumentacion();
+      updateSummary();
+      document.getElementById('loadBanner').classList.remove('show');
+      showToast('Inspección cargada');
+    }
+  }catch(e){ showToast('No se pudo cargar'); }
+}
+
+function showTab(name){
+  ['inspeccion','documentacion','proveedores','mantenimientos','nn','historial'].forEach(n=>{
+    document.getElementById('panel-'+n).classList.toggle('active', n===name);
+    document.getElementById('tabBtn-'+n).classList.toggle('active', n===name);
+  });
+  document.getElementById('summaryBar').style.display = (name==='inspeccion') ? 'block' : 'none';
+  if(name==='historial') loadHistorial();
+  if(name==='nn') renderNN();
+}
+
+/* ---------- INSPECCIÓN ---------- */
+function buildInspeccionPanel(){
+  const root = document.getElementById('panel-inspeccion');
+  root.innerHTML = '';
+  CATEGORIES.forEach((cat, ci)=>{
+    totalInspItems += cat.items.length;
+    const wrap = document.createElement('div');
+    wrap.className = 'category';
+    wrap.innerHTML = `
+      <div class="cat-head" onclick="toggleCat(this)">
+        <div class="cat-head-left">
+          <div class="cat-icon">${cat.icon}</div>
+          <div>
+            <div class="cat-title">${cat.title}</div>
+            <div class="cat-sub" id="catSub${ci}">0/${cat.items.length}</div>
+          </div>
+        </div>
+        <div class="chev">▾</div>
+      </div>
+      <div class="cat-body">
+        ${cat.items.map((name, ii)=>`
+          <div class="item">
+            <div class="item-name">${name}</div>
+            <div class="btns">
+              <button class="btn ok" onclick="setInspStatus(${ci},${ii},'ok')">✓</button>
+              <button class="btn warn" onclick="setInspStatus(${ci},${ii},'warn')">!</button>
+              <button class="btn na" onclick="setInspStatus(${ci},${ii},'na')">–</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    root.appendChild(wrap);
+  });
+}
+
+function toggleCat(head){
+  const body = head.nextElementSibling;
+  const isOpen = head.classList.contains('open');
+  head.parentElement.parentElement.querySelectorAll('.cat-head').forEach(h=>h.classList.remove('open'));
+  head.parentElement.parentElement.querySelectorAll('.cat-body').forEach(b=>b.style.maxHeight=null);
+  if(!isOpen){
+    head.classList.add('open');
+    body.style.maxHeight = body.scrollHeight + 'px';
+  }
+}
+
+function setInspStatus(ci, ii, status){
+  const key = ci+'-'+ii;
+  inspState[key] = (inspState[key]===status) ? null : status;
+  renderInspItemButtons(ci, ii);
+  updateSummary();
+  updateCatSub(ci);
+  scheduleAutosave();
+}
+
+function renderInspItemButtons(ci, ii){
+  const cats = document.querySelectorAll('#panel-inspeccion .category');
+  const item = cats[ci].querySelectorAll('.item')[ii];
+  const val = inspState[ci+'-'+ii];
+  item.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+  if(val==='ok') item.querySelector('.btn.ok').classList.add('active');
+  if(val==='warn') item.querySelector('.btn.warn').classList.add('active');
+  if(val==='na') item.querySelector('.btn.na').classList.add('active');
+}
+
+function updateCatSub(ci){
+  const cat = CATEGORIES[ci];
+  let done = 0;
+  cat.items.forEach((_,ii)=>{ if(inspState[ci+'-'+ii]) done++; });
+  document.getElementById('catSub'+ci).textContent = `${done}/${cat.items.length}`;
+}
+
+function renderInspection(){
+  CATEGORIES.forEach((cat, ci)=>{
+    cat.items.forEach((_, ii)=> renderInspItemButtons(ci, ii));
+    updateCatSub(ci);
+  });
+}
+
+function updateSummary(){
+  let done=0, ok=0, warn=0;
+  Object.values(inspState).forEach(v=>{
+    if(v){ done++; if(v==='ok') ok++; if(v==='warn') warn++; }
+  });
+  const pct = totalInspItems ? Math.round((done/totalInspItems)*100) : 0;
+  document.getElementById('pctText').textContent = pct+'%';
+  document.getElementById('pctLabel').textContent = `${done} de ${totalInspItems} puntos revisados`;
+  document.getElementById('barFill').style.width = pct+'%';
+  document.getElementById('chipOk').textContent = ok+' OK';
+  document.getElementById('chipWarn').textContent = warn+' observaciones';
+}
+
+/* ---------- DOCUMENTACIÓN ---------- */
+function buildDocumentacionPanel(){
+  const root = document.getElementById('panel-documentacion');
+  root.innerHTML = '';
+  DOC_SYSTEMS.forEach((sys, si)=>{
+    totalDocItems += sys.docs.length;
+    const wrap = document.createElement('div');
+    wrap.className = 'category';
+    wrap.innerHTML = `
+      <div class="cat-head" onclick="toggleCat(this)">
+        <div class="cat-head-left">
+          <div class="cat-icon">${sys.icon}</div>
+          <div>
+            <div class="cat-title">${sys.title}</div>
+            <div class="cat-sub" id="docSub${si}">0/${sys.docs.length}</div>
+          </div>
+        </div>
+        <div class="chev">▾</div>
+      </div>
+      <div class="cat-body">
+        ${sys.docs.map((name, di)=>`
+          <div class="item">
+            <div class="item-name">${name}</div>
+            <div class="btns">
+              <button class="btn doc" onclick="setDocStatus(${si},${di},'ok')">✓ Disponible</button>
+              <button class="btn na" onclick="setDocStatus(${si},${di},'na')">– No aplica</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    // widen doc buttons
+    wrap.querySelectorAll('.btn').forEach(b=>b.classList.add('wide'));
+    root.appendChild(wrap);
+  });
+}
+
+function setDocStatus(si, di, status){
+  const key = si+'-'+di;
+  docState[key] = (docState[key]===status) ? null : status;
+  renderDocItemButtons(si, di);
+  updateDocSub(si);
+  scheduleAutosave();
+}
+
+function renderDocItemButtons(si, di){
+  const cats = document.querySelectorAll('#panel-documentacion .category');
+  const item = cats[si].querySelectorAll('.item')[di];
+  const val = docState[si+'-'+di];
+  item.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+  if(val==='ok') item.querySelector('.btn.doc').classList.add('active');
+  if(val==='na') item.querySelector('.btn.na').classList.add('active');
+}
+
+function updateDocSub(si){
+  const sys = DOC_SYSTEMS[si];
+  let done = 0;
+  sys.docs.forEach((_,di)=>{ if(docState[si+'-'+di]) done++; });
+  document.getElementById('docSub'+si).textContent = `${done}/${sys.docs.length}`;
+}
+
+function renderDocumentacion(){
+  DOC_SYSTEMS.forEach((sys, si)=>{
+    sys.docs.forEach((_, di)=> renderDocItemButtons(si, di));
+    updateDocSub(si);
+  });
+}
+
+/* ---------- PROVEEDORES ---------- */
+function provKey(p){ return (p.id+'-'+p.nombre).replace(/[^a-zA-Z0-9]/g,'_'); }
+
+function renderProviders(){
+  const root = document.getElementById('panel-proveedores');
+  root.innerHTML = '';
+  const selId = currentSede ? currentSede.id : null;
+  PROVIDERS.forEach((p, pi)=>{
+    const relevant = selId ? p.sedes.includes(selId) : true;
+    const card = document.createElement('div');
+    card.className = 'prov-card' + (selId && !relevant ? ' dim' : '');
+    const badgeClass = p.prioridad.toLowerCase();
+    const pk = provKey(p);
+    card.innerHTML = `
+      <div class="prov-top">
+        <div>
+          <div class="prov-rubro">${p.rubro}</div>
+          <div class="prov-name">${p.nombre}</div>
+        </div>
+        <div class="prov-badge ${badgeClass}">${p.prioridad}</div>
+      </div>
+      <div class="prov-meta">
+        📍 ${p.direccion}<br>
+        📞 ${p.telefono}
+        ${relevant && selId ? `<br><span class="prov-tag">Atiende esta sede</span>` : ''}
+      </div>
+      <div class="prov-actions">
+        <button class="prov-action-btn" onclick="toggleProvForm('${pk}','cot')">📋 Cotización</button>
+        <button class="prov-action-btn" onclick="toggleProvForm('${pk}','vis')">🔧 Visita a taller</button>
+      </div>
+      <div class="prov-log-form" id="form-cot-${pk}">
+        <input type="text" id="input-cot-${pk}" placeholder="Monto o detalle de la cotización">
+        <button class="prov-log-save" onclick="saveProvLog('${pk}','cot','${p.nombre.replace(/'/g,"\\'")}')">Guardar cotización</button>
+      </div>
+      <div class="prov-log-form" id="form-vis-${pk}">
+        <input type="text" id="input-vis-${pk}" placeholder="Notas de la visita al taller">
+        <button class="prov-log-save" onclick="saveProvLog('${pk}','vis','${p.nombre.replace(/'/g,"\\'")}')">Guardar visita</button>
+      </div>
+      <div class="prov-log-list" id="log-${pk}"></div>
+    `;
+    root.appendChild(card);
+    renderProvLogs(pk);
+  });
+  if(!root.innerHTML){
+    root.innerHTML = `<div class="hist-empty">Selecciona una sede para ver proveedores</div>`;
+  }
+}
+
+function toggleProvForm(pk, type){
+  const other = type==='cot' ? 'vis' : 'cot';
+  document.getElementById(`form-${other}-${pk}`).classList.remove('show');
+  document.getElementById(`form-${type}-${pk}`).classList.toggle('show');
+}
+
+async function saveProvLog(pk, type, nombre){
+  const input = document.getElementById(`input-${type}-${pk}`);
+  const text = input.value.trim();
+  if(!text) return;
+  const entry = {
+    tipo: type==='cot' ? 'Cotización' : 'Visita a taller',
+    nota: text,
+    fecha: fmtDate(new Date()),
+    sede: currentSede ? currentSede.id : '—'
+  };
+  try{
+    let list = [];
+    try{
+      const res = await window.storage.get(`provlog:${pk}`, false);
+      if(res && res.value) list = JSON.parse(res.value);
+    }catch(e){}
+    list.unshift(entry);
+    await window.storage.set(`provlog:${pk}`, JSON.stringify(list), false);
+    input.value = '';
+    document.getElementById(`form-${type}-${pk}`).classList.remove('show');
+    renderProvLogs(pk);
+    showToast(entry.tipo+' guardada');
+  }catch(e){ showToast('No se pudo guardar'); }
+}
+
+async function renderProvLogs(pk){
+  const box = document.getElementById(`log-${pk}`);
+  if(!box) return;
+  try{
+    const res = await window.storage.get(`provlog:${pk}`, false);
+    if(res && res.value){
+      const list = JSON.parse(res.value).slice(0,3);
+      box.innerHTML = list.map(l=>`<div class="prov-log-item"><b>${l.tipo}</b> · ${l.fecha} (${l.sede})<br>${l.nota}</div>`).join('');
+    } else {
+      box.innerHTML = '';
+    }
+  }catch(e){ box.innerHTML=''; }
+}
+
+/* ---------- MANTENIMIENTOS ---------- */
+function currentMonthKey(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+function buildMantenimientosPanel(){
+  const root = document.getElementById('panel-mantenimientos');
+  root.innerHTML = `
+    <div class="mtto-summary">
+      <div class="mtto-stat"><div class="num" id="mtDone">0</div><div class="lbl">Ejecutados</div></div>
+      <div class="mtto-stat"><div class="num" id="mtPend">${MANTTO_SISTEMAS.length}</div><div class="lbl">Pendientes</div></div>
+      <div class="mtto-stat"><div class="num" id="mtPct">0%</div><div class="lbl">Cumplimiento</div></div>
+    </div>
+    <div class="category"><div class="cat-body" style="max-height:none;" id="mttoList"></div></div>
+  `;
+  const list = document.getElementById('mttoList');
+  MANTTO_SISTEMAS.forEach((sys, i)=>{
+    const row = document.createElement('div');
+    row.className = 'mtto-row';
+    row.innerHTML = `
+      <div>
+        <div class="mtto-name">${sys.name}</div>
+        <div class="mtto-freq">${sys.freq}</div>
+      </div>
+      <div class="toggle" id="mtToggle${i}" onclick="toggleMantto(${i})"><div class="knob"></div></div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function toggleMantto(i){
+  manttoState[i] = !manttoState[i];
+  document.getElementById('mtToggle'+i).classList.toggle('active', !!manttoState[i]);
+  updateManttoSummary();
+  saveMantto();
+}
+
+function updateManttoSummary(){
+  const total = MANTTO_SISTEMAS.length;
+  const done = Object.values(manttoState).filter(Boolean).length;
+  document.getElementById('mtDone').textContent = done;
+  document.getElementById('mtPend').textContent = total - done;
+  document.getElementById('mtPct').textContent = total ? Math.round((done/total)*100)+'%' : '0%';
+}
+
+async function loadMantto(){
+  manttoState = {};
+  MANTTO_SISTEMAS.forEach((_,i)=>document.getElementById('mtToggle'+i)?.classList.remove('active'));
+  if(!currentSede){ updateManttoSummary(); return; }
+  try{
+    const res = await window.storage.get(`mantto:${currentSede.id}:${currentMonthKey()}`, false);
+    if(res && res.value) manttoState = JSON.parse(res.value);
+  }catch(e){}
+  MANTTO_SISTEMAS.forEach((_,i)=>{
+    document.getElementById('mtToggle'+i)?.classList.toggle('active', !!manttoState[i]);
+  });
+  updateManttoSummary();
+}
+
+async function saveMantto(){
+  if(!currentSede) return;
+  try{
+    await window.storage.set(`mantto:${currentSede.id}:${currentMonthKey()}`, JSON.stringify(manttoState), false);
+  }catch(e){}
+}
+
+/* ---------- NUEVOS NEGOCIOS ---------- */
+function buildNNPanel(){
+  const root = document.getElementById('panel-nn');
+  root.innerHTML = `
+    <div class="nn-form">
+      <input type="text" id="nnNombre" placeholder="Nombre del nuevo local">
+      <input type="text" id="nnDireccion" placeholder="Dirección">
+      <select id="nnEstado">
+        <option value="pendiente">Plan de mantenimiento: Pendiente</option>
+        <option value="proceso">Plan de mantenimiento: En proceso</option>
+        <option value="implementado">Plan de mantenimiento: Implementado</option>
+      </select>
+      <button onclick="addNN()">Agregar nuevo negocio</button>
+    </div>
+    <div id="nnList"></div>
+  `;
+}
+
+async function loadNN(){
+  try{
+    const res = await window.storage.get('nn:items', false);
+    nnItems = (res && res.value) ? JSON.parse(res.value) : [];
+  }catch(e){ nnItems = []; }
+}
+
+async function saveNN(){
+  try{ await window.storage.set('nn:items', JSON.stringify(nnItems), false); }catch(e){}
+}
+
+async function addNN(){
+  const nombre = document.getElementById('nnNombre').value.trim();
+  const direccion = document.getElementById('nnDireccion').value.trim();
+  const estado = document.getElementById('nnEstado').value;
+  if(!nombre){ showToast('Escribe el nombre del local'); return; }
+  nnItems.unshift({id:Date.now(), nombre, direccion, estado, fecha:fmtDate(new Date())});
+  await saveNN();
+  document.getElementById('nnNombre').value='';
+  document.getElementById('nnDireccion').value='';
+  renderNN();
+  showToast('Nuevo negocio agregado');
+}
+
+function cycleNNStatus(id){
+  const order = ['pendiente','proceso','implementado'];
+  const item = nnItems.find(x=>x.id===id);
+  if(!item) return;
+  item.estado = order[(order.indexOf(item.estado)+1) % order.length];
+  saveNN();
+  renderNN();
+}
+
+function deleteNN(id){
+  nnItems = nnItems.filter(x=>x.id!==id);
+  saveNN();
+  renderNN();
+}
+
+async function renderNN(){
+  await loadNN();
+  const list = document.getElementById('nnList');
+  if(!list) return;
+  if(nnItems.length===0){
+    list.innerHTML = `<div class="hist-empty">Aún no hay nuevos negocios registrados.</div>`;
+    return;
+  }
+  const labels = {pendiente:'Pendiente', proceso:'En proceso', implementado:'Implementado'};
+  list.innerHTML = nnItems.map(item=>`
+    <div class="nn-card">
+      <div class="nn-top">
+        <div>
+          <div class="nn-name">${item.nombre}</div>
+          <div class="nn-dir">${item.direccion || 'Sin dirección registrada'}</div>
+          <div class="nn-date">Registrado el ${item.fecha}</div>
+        </div>
+        <button class="nn-del" onclick="deleteNN(${item.id})">✕</button>
+      </div>
+      <div style="margin-top:10px;">
+        <button class="nn-status ${item.estado}" onclick="cycleNNStatus(${item.id})">${labels[item.estado]} · toca para avanzar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ---------- HISTORIAL ---------- */
+async function loadHistorial(){
+  const root = document.getElementById('panel-historial');
+  root.innerHTML = `<div class="hist-empty">Cargando historial...</div>`;
+  try{
+    const list = await window.storage.list('history:', false);
+    if(!list || !list.keys || list.keys.length===0){
+      root.innerHTML = `<div class="hist-empty">Aún no hay inspecciones guardadas.<br>Usa "Enviar por WhatsApp" para registrar una.</div>`;
+      return;
+    }
+    const records = [];
+    for(const key of list.keys){
+      try{
+        const res = await window.storage.get(key, false);
+        if(res && res.value) records.push(JSON.parse(res.value));
+      }catch(e){}
+    }
+    records.sort((a,b)=> (b.ts||0) - (a.ts||0));
+    root.innerHTML = '';
+    records.forEach(rec=>{
+      const div = document.createElement('div');
+      div.className = 'hist-card';
+      div.innerHTML = `
+        <div class="hist-left">
+          <div class="hist-sede">${rec.sedeId} · ${rec.sedeNombre}</div>
+          <div class="hist-date">${rec.fecha} · ${rec.inspector || 'Sin nombre'}</div>
+        </div>
+        <div class="hist-right">${rec.pct}%</div>
+      `;
+      root.appendChild(div);
+    });
+  }catch(e){
+    root.innerHTML = `<div class="hist-empty">No se pudo cargar el historial.</div>`;
+  }
+}
+
+/* ---------- GUARDADO ---------- */
+function scheduleAutosave(){
+  dirty = true;
+  document.getElementById('chipSave').textContent = 'Cambios sin guardar';
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(()=>saveRecord(false), 1200);
+}
+
+async function saveRecord(manual){
+  if(!currentSede){
+    if(manual) showToast('Selecciona una sede primero');
+    return;
+  }
+  const record = {
+    sedeId: currentSede.id,
+    sedeNombre: currentSede.sede,
+    inspector: document.getElementById('inspector').value,
+    fecha: document.getElementById('fecha').value,
+    mobiliario: document.getElementById('mobiliario').value,
+    insp: inspState,
+    doc: docState
+  };
+  try{
+    await window.storage.set(`latest:${currentSede.id}`, JSON.stringify(record), false);
+    dirty = false;
+    document.getElementById('chipSave').textContent = 'Guardado ✓';
+    if(manual) showToast('Inspección guardada');
+  }catch(e){
+    if(manual) showToast('No se pudo guardar');
+  }
+}
+
+function resetAll(rerender=true){
+  inspState = {};
+  docState = {};
+  document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mobiliario').value = '';
+  updateSummary();
+  CATEGORIES.forEach((_,ci)=>updateCatSub(ci));
+  DOC_SYSTEMS.forEach((_,si)=>updateDocSub(si));
+  document.getElementById('chipSave').textContent = 'Sin guardar';
+  dirty = false;
+}
+
+async function sendWhatsApp(){
+  const sede = currentSede;
+  const inspector = document.getElementById('inspector').value || 'Sin nombre';
+  const fecha = document.getElementById('fecha').value;
+  let lines = [];
+  lines.push('*FICHA DE INSPECCIÓN — CÁLIDDA*');
+  lines.push(sede ? `Sede: ${sede.id} · ${sede.sede} — ${sede.formato} (${sede.ubicacion})` : 'Sede: no seleccionada');
+  lines.push(`Inspector: ${inspector}`);
+  lines.push(`Fecha: ${fecha}`);
+  lines.push('');
+  CATEGORIES.forEach((cat, ci)=>{
+    lines.push(`*${cat.title}*`);
+    cat.items.forEach((name, ii)=>{
+      const v = inspState[ci+'-'+ii];
+      const mark = v==='ok' ? '✅' : v==='warn' ? '⚠️' : v==='na' ? '➖' : '⬜';
+      lines.push(`${mark} ${name}`);
+    });
+    lines.push('');
+  });
+  let done=0, ok=0, warn=0;
+  Object.values(inspState).forEach(v=>{ if(v){done++; if(v==='ok')ok++; if(v==='warn')warn++;} });
+  const pct = totalInspItems ? Math.round((done/totalInspItems)*100) : 0;
+  lines.push(`Resumen: ${ok} OK · ${warn} observaciones · ${done}/${totalInspItems} revisados (${pct}%)`);
+  const text = encodeURIComponent(lines.join('\n'));
+
+  // Persist as a finalized history entry + update latest
+  if(sede){
+    const record = {
+      sedeId: sede.id, sedeNombre: sede.sede, inspector, fecha,
+      insp: inspState, doc: docState, pct, ts: Date.now()
+    };
+    try{
+      await window.storage.set(`latest:${sede.id}`, JSON.stringify(record), false);
+      await window.storage.set(`history:${sede.id}:${Date.now()}`, JSON.stringify(record), false);
+      document.getElementById('chipSave').textContent = 'Guardado ✓';
+    }catch(e){}
+  }
+  window.open(`https://wa.me/?text=${text}`, '_blank');
+}
+
+buildSedeOptions();
+buildInspeccionPanel();
+buildDocumentacionPanel();
+buildMantenimientosPanel();
+buildNNPanel();
+renderProviders();
+document.getElementById('fecha').value = fmtDate(new Date());
+updateSummary();
+updateManttoSummary();
+</script>
+</body>
+</html>
